@@ -44,6 +44,23 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   }
 };
 
+export const optionalAuth = (req: Request, _res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = verifyToken(token);
+      req.user = decoded;
+    } catch {
+      // Intentionally ignore invalid/expired tokens for public routes
+      req.user = undefined;
+    }
+  }
+
+  next();
+};
+
 export const requireRole = (...allowedRoles: Role[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
