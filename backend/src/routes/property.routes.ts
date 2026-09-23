@@ -8,7 +8,7 @@ import {
   deleteProperty,
   getAgentProperties,
 } from '../controllers/property.controller';
-import { authenticate, requireRole } from '../middleware/auth.middleware';
+import { authenticate, optionalAuth, requireRole } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.get('/', getProperties);
 // Agent specific listings (declared before /:id to prevent route shadowing)
 router.get('/agent/me', authenticate, requireRole(Role.AGENT), getAgentProperties);
 
-router.get('/:id', getPropertyById);
+router.get('/:id', optionalAuth, getPropertyById);
 
 // Agent write routes
 router.post('/', authenticate, requireRole(Role.AGENT), createProperty);

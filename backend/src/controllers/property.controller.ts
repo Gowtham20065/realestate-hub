@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { Prisma } from '@prisma/client';
+import { Prisma, InteractionType } from '@prisma/client';
 import prisma from '../lib/prisma';
+import { logInteraction } from '../services/interaction.service';
 import {
   propertyQuerySchema,
   createPropertySchema,
@@ -157,6 +158,9 @@ export const getPropertyById = async (req: Request, res: Response): Promise<void
       });
       return;
     }
+
+    // Transparent non-blocking view logging for recommender
+    logInteraction(property.id, InteractionType.VIEW, req.user?.id);
 
     res.status(200).json({
       success: true,

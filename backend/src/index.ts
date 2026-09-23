@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import prisma from './lib/prisma';
 import authRoutes from './routes/auth.routes';
 import propertyRoutes from './routes/property.routes';
+import savedPropertyRoutes from './routes/savedProperty.routes';
+import inquiryRoutes from './routes/inquiry.routes';
+import interactionRoutes from './routes/interaction.routes';
 
 dotenv.config();
 
@@ -16,6 +19,9 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/saved-properties', savedPropertyRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/interactions', interactionRoutes);
 
 // Health check endpoint
 app.get('/api/health', async (_req: Request, res: Response) => {
