@@ -7,8 +7,13 @@ import propertyRoutes from './routes/property.routes';
 import savedPropertyRoutes from './routes/savedProperty.routes';
 import inquiryRoutes from './routes/inquiry.routes';
 import interactionRoutes from './routes/interaction.routes';
+import reviewRoutes from './routes/review.routes';
+import { connectMongo } from './lib/mongo';
 
 dotenv.config();
+
+// Establish MongoDB connection
+connectMongo();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +27,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/saved-properties', savedPropertyRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/interactions', interactionRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health check endpoint
 app.get('/api/health', async (_req: Request, res: Response) => {

@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Property } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
+import { AgentReviewsSection } from '../components/AgentReviewsSection';
 import {
   Bed,
   Bath,
@@ -298,6 +299,12 @@ export const PropertyDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Agent Reviews & Sentiment Section */}
+          <AgentReviewsSection
+            agentId={property.agentId}
+            agentName={property.agent?.name || 'Listing Agent'}
+          />
         </div>
 
         {/* Right Column: Agent Card & Contact Inquiry Form */}
