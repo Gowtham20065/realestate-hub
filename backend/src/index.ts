@@ -8,6 +8,7 @@ import savedPropertyRoutes from './routes/savedProperty.routes';
 import inquiryRoutes from './routes/inquiry.routes';
 import interactionRoutes from './routes/interaction.routes';
 import reviewRoutes from './routes/review.routes';
+import recommendationRoutes from './routes/recommendation.routes';
 import { connectMongo } from './lib/mongo';
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/api/saved-properties', savedPropertyRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/interactions', interactionRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 // Health check endpoint
 app.get('/api/health', async (_req: Request, res: Response) => {

@@ -4,6 +4,7 @@ import type { Property } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../api/client';
 import { AgentReviewsSection } from '../components/AgentReviewsSection';
+import { SimilarPropertiesSection } from '../components/SimilarPropertiesSection';
 import {
   Bed,
   Bath,
@@ -382,6 +383,9 @@ export const PropertyDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Content-Based Similar Properties */}
+        {property && <SimilarPropertiesSection propertyId={property.id} />}
       </div>
     </div>
   );

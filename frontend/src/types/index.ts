@@ -70,3 +70,18 @@ export interface SavedProperty {
   createdAt: string;
   property: Property;
 }
+
+export interface RecommendedPropertyItem {
+  property_id: string;
+  score: number;
+  match_percentage: number;
+  reason: string;
+  property: Property;
+}
+
+export interface RecommendationResponse {
+  user_id?: string | null;
+  strategy: 'personalized_hybrid' | 'cold_start_trending' | 'content_similarity' | 'cold_start_fallback';
+  total: number;
+  recommendations: RecommendedPropertyItem[];
+}

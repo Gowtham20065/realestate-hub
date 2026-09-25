@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { Property } from '../types';
 import { apiClient } from '../api/client';
 import { PropertyCard } from '../components/PropertyCard';
+import { RecommendationsSection } from '../components/RecommendationsSection';
 import { Search, Sparkles, ShieldCheck, ArrowRight, Building2 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -128,6 +129,9 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* AI Recommendations Section */}
+      <RecommendationsSection />
 
       {/* Featured Properties Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
