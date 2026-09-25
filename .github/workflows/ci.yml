@@ -1,0 +1,146 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # 1. Backend CI (Node.js + Prisma + Tests)
+  # ==========================================
+  backend-ci:
+    name: Backend (Node.js & Prisma)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: realestate_hub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Apply Database Migrations
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/realestate_hub_test?schema=public
+        run: npx prisma migrate deploy
+
+      - name: Seed Database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/realestate_hub_test?schema=public
+        run: npx tsx prisma/seed.ts
+
+      - name: Compile TypeScript Build
+        run: npm run build
+
+      - name: Run Jest Test Suite
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/realestate_hub_test?schema=public
+          MONGO_URI: mongodb://localhost:27017/realestate_reviews_test
+          JWT_SECRET: ci_test_secret_jwt_key_123456789
+          NODE_ENV: test
+          PORT: 5000
+        run: npm test
+
+  # ==========================================
+  # 2. Frontend CI (React + Vite + Build)
+  # ==========================================
+  frontend-ci:
+    name: Frontend (React & Vite)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Compile & Build Production Bundle
+        run: npm run build
+
+  # ==========================================
+  # 3. Recommendation Service CI (Python)
+  # ==========================================
+  recommender-ci:
+    name: Recommender (Python & Pytest)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: recommender
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: recommender/requirements.txt
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Pytest Test Suite
+        run: pytest -v
