@@ -9,6 +9,9 @@ import { PropertyDetailPage } from './pages/PropertyDetailPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { CreatePropertyPage } from './pages/CreatePropertyPage';
+import { SavedPropertiesPage } from './pages/SavedPropertiesPage';
+import { BuyerInquiriesPage } from './pages/BuyerInquiriesPage';
+import { AgentInquiriesPage } from './pages/AgentInquiriesPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 export const App: React.FC = () => {
@@ -25,12 +28,38 @@ export const App: React.FC = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
 
-              {/* Agent only listing creation route */}
+              {/* Protected Buyer Routes */}
+              <Route
+                path="/saved"
+                element={
+                  <ProtectedRoute>
+                    <SavedPropertiesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-inquiries"
+                element={
+                  <ProtectedRoute>
+                    <BuyerInquiriesPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Protected Agent Routes */}
               <Route
                 path="/create-property"
                 element={
                   <ProtectedRoute requiredRole="AGENT">
                     <CreatePropertyPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agent/inquiries"
+                element={
+                  <ProtectedRoute requiredRole="AGENT">
+                    <AgentInquiriesPage />
                   </ProtectedRoute>
                 }
               />

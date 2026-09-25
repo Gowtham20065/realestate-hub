@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, Heart, PlusCircle, LogOut, Menu, X } from 'lucide-react';
+import { Home, Heart, PlusCircle, LogOut, Menu, X, MessageSquare } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -36,23 +36,41 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {isAuthenticated && user?.role === 'BUYER' && (
-              <Link
-                to="/saved"
-                className="flex items-center space-x-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
-              >
-                <Heart className="w-4 h-4 text-rose-500" />
-                <span>Saved</span>
-              </Link>
+              <>
+                <Link
+                  to="/saved"
+                  className="flex items-center space-x-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+                >
+                  <Heart className="w-4 h-4 text-rose-500" />
+                  <span>Saved</span>
+                </Link>
+                <Link
+                  to="/my-inquiries"
+                  className="flex items-center space-x-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4 text-blue-500" />
+                  <span>My Inquiries</span>
+                </Link>
+              </>
             )}
 
             {isAuthenticated && user?.role === 'AGENT' && (
-              <Link
-                to="/create-property"
-                className="flex items-center space-x-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>List Property</span>
-              </Link>
+              <>
+                <Link
+                  to="/agent/inquiries"
+                  className="flex items-center space-x-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4 text-amber-500" />
+                  <span>Inquiries Inbox</span>
+                </Link>
+                <Link
+                  to="/create-property"
+                  className="flex items-center space-x-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>List Property</span>
+                </Link>
+              </>
             )}
           </nav>
 
@@ -116,22 +134,40 @@ export const Navbar: React.FC = () => {
             Browse Properties
           </Link>
           {isAuthenticated && user?.role === 'BUYER' && (
-            <Link
-              to="/saved"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Saved Properties
-            </Link>
+            <>
+              <Link
+                to="/saved"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Saved Properties
+              </Link>
+              <Link
+                to="/my-inquiries"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50"
+              >
+                My Inquiries
+              </Link>
+            </>
           )}
           {isAuthenticated && user?.role === 'AGENT' && (
-            <Link
-              to="/create-property"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:bg-blue-50"
-            >
-              + List Property
-            </Link>
+            <>
+              <Link
+                to="/agent/inquiries"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Inquiries Inbox
+              </Link>
+              <Link
+                to="/create-property"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:bg-blue-50"
+              >
+                + List Property
+              </Link>
+            </>
           )}
           <div className="pt-4 border-t border-slate-200">
             {isAuthenticated && user ? (
