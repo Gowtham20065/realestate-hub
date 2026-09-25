@@ -1,4 +1,7 @@
 services:
+  # ==========================================
+  # 1. PostgreSQL 16 (Relational Database)
+  # ==========================================
   postgres:
     image: postgres:16-alpine
     container_name: realestate_postgres
@@ -19,6 +22,9 @@ services:
     networks:
       - realestate_network
 
+  # ==========================================
+  # 2. MongoDB 7.0 (Agent Reviews & Sentiment)
+  # ==========================================
   mongodb:
     image: mongo:7.0
     container_name: realestate_mongodb
@@ -39,6 +45,9 @@ services:
     networks:
       - realestate_network
 
+  # ==========================================
+  # 3. Redis 7 (Caching & Rate Limiting)
+  # ==========================================
   redis:
     image: redis:7-alpine
     container_name: realestate_redis
@@ -53,6 +62,85 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - realestate_network
+
+  # ==========================================
+  # 4. Backend API (Node.js + Prisma)
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: realestate_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-realestate_hub_dev}?schema=public
+      MONGO_URI: mongodb://${MONGO_ROOT_USER:-mongo}:${MONGO_ROOT_PASSWORD:-mongo}@mongodb:27017/${MONGO_DB:-realestate_reviews}?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-supersecretjwtkey_change_in_production_123456789}
+      RECOMMENDER_SERVICE_URL: http://recommender:8000
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - realestate_network
+
+  # ==========================================
+  # 5. Recommender Service (FastAPI + ML)
+  # ==========================================
+  recommender:
+    build:
+      context: ./recommender
+      dockerfile: Dockerfile
+    container_name: realestate_recommender
+    restart: unless-stopped
+    environment:
+      PORT: 8000
+      HOST: 0.0.0.0
+      NODE_API_URL: http://backend:5000/api
+      CORS_ORIGINS: http://localhost,http://localhost:80,http://localhost:3000,http://localhost:5173,http://frontend
+    ports:
+      - "${RECOMMENDER_PORT:-8000}:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - realestate_network
+
+  # ==========================================
+  # 6. Frontend Web UI (React + Nginx)
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: realestate_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
     networks:
       - realestate_network
 
